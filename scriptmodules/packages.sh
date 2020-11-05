@@ -1,6 +1,7 @@
 #!/bin/bash
 
-function emb_listFunctions() {
+function emb_listFunctions()
+{
     local idx
     local mod_id
     local desc
@@ -24,7 +25,8 @@ function emb_listFunctions() {
     echo "==================================================================================================================================="
 }
 
-function emb_printUsageinfo() {
+function emb_printUsageinfo()
+{
     echo -e "Usage:\n$0 <Index # or ID>\nThis will run the actions depends, sources, build, install, configure and clean automatically.\n"
     echo -e "Alternatively, $0 can be called as\n$0 <Index # or ID [depends|sources|build|install|configure|clean|remove]\n"
     echo    "Definitions:"
@@ -39,7 +41,8 @@ function emb_printUsageinfo() {
     emb_listFunctions
 }
 
-function emb_callModule() {
+function emb_callModule()
+{
     local req_id="$1"
     local mode="$2"
     local md_id
@@ -69,7 +72,8 @@ function emb_callModule() {
     return 0
 }
 
-function emb_registerModule() {
+function emb_registerModule()
+{
     local module_idx="$1"
     local module_path="$2"
     local module_type="$3"
@@ -100,7 +104,8 @@ function emb_registerModule() {
     __mod_id_to_idx["$emb_module_id"]="$module_idx"    
 }
 
-function emb_registerModuleDir() {
+function emb_registerModuleDir()
+{
     local module_idx="$1"
     local module_dir="$2"
     for module in $(find "${scriptdir}/scriptmodules/$2" -maxdepth 1 -name "*.sh" | sort); do
@@ -109,7 +114,8 @@ function emb_registerModuleDir() {
     done
 }
 
-function emb_registerAllModules() {
+function emb_registerAllModules()
+{
     __mod_idx=()
     __mod_id=()
     __mod_type=()
@@ -118,12 +124,15 @@ function emb_registerAllModules() {
     __mod_section=()
 
     emb_registerModuleDir 100 "hardwares"
+    emb_registerModuleDir 900 "admin"
 }
 
-function emb_getIdxFromId() {
+function emb_getIdxFromId()
+{
     echo "${__mod_id_to_idx[$1]}"
 }
 
-function emb_getIdFromIdx() {
+function emb_getIdFromIdx()
+{
     echo "${__mod_id[$1]}"
 }
