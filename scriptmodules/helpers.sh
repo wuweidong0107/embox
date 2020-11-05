@@ -1,5 +1,25 @@
 #!/bin/bash
 
+## @file helpers.sh
+## @brief RetroPie helpers library
+## @copyright GPLv3
+
+## @fn printMsgs()
+## @param type style of display to use - dialog, console or heading
+## @param message string or array of messages to display
+## @brief Prints messages in a variety of ways.
+function printMsgs() {
+    local type="$1"
+    shift
+
+    for msg in "$@"; do
+        [[ "$type" == "dialog" ]] && dialog --backtitle "$__backtitle" --cr-wrap --no-collapse --msgbox "$msg" 20 60 >/dev/tty
+        [[ "$type" == "console" ]] && echo -e "$msg"
+        [[ "$type" == "heading" ]] && echo -e "\n= = = = = = = = = = = = = = = = = = = = =\n$msg\n= = = = = = = = = = = = = = = = = = = = =\n"
+    done
+    return 0
+}
+
 ## @fn gitPullOrClone()
 ## @param dest destination directory
 ## @param repo repository to clone or pull from

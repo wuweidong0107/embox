@@ -4,6 +4,106 @@ emb_module_id="setup"
 emb_module_desc="GUI based setup for embox"
 emb_module_section=""
 
+function package_setup()
+{
+    local idx="$1"
+    local md_id="${__mod_id[$idx]}"
+
+    declare -A option_msgs=(
+        ["B"]="Install from pre-compiled binary"
+        ["S"]="Install from source"
+    )
+
+    while true; do
+        local options=()
+
+        options+=(S "${option_msgs[S]}")
+
+        local help="${__mod_desc[$idx]}\n\n${__mod_help[$idx]}"
+        if [[ -n "$help" ]]; then
+            options+=(H "Package Help")
+        fi
+
+        cmd=(dialog --backtitle "$__backtitle" --cancel-label "Back" --menu "Choose an option for ${__mod_id[$idx]}\n$status" 22 76 16)
+        choice=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
+
+        case "$choice" in
+            S)
+                mode="_source_"
+                dialog --defaultno --yesno "Are you sure you want to ${option_msgs[$choice]}?" 22 76 2>&1 >/dev/tty || continue
+                emb_installModule "$idx" "$mode" "force"
+                ;;
+            H)
+                printMsgs "dialog" "$help"
+                ;;
+            *)
+                break
+                ;;
+        esac
+    done
+}
+
+function section_gui_setup()
+{
+    local section="$1"
+    local default=""
+
+    while true; do
+        local options=()
+        local pkgs=()
+        local idx
+
+        for idx in $(emb_getSectionIds $section); do
+            pkgs+=("$idx" "${__mod_id[$idx]}" "$idx ${__mod_desc[$idx]}"$'\n\n'"${__mod_help[$idx]}")
+        done
+
+        options+=(
+            I "Install all ${__sections[$section]} packages" "This will install all $section packages."
+            X "Remove all ${__sections[$section]} packages" "This will remove all $section packages."
+        )
+        options+=("${pkgs[@]}")
+
+        local cmd=(dialog --colors --backtitle "$__backtitle" --cancel-label "Back" --item-help --help-button --default-item "$default" --menu "Choose an option" 22 76 16)
+        local choice=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
+        [[ -z "$choice" ]] && break
+        default="$choice"
+
+        case "$choice" in
+            I)
+                echo "Remove all"
+                ;;
+            X)
+                echo "Install all"
+                ;;
+            *)
+                package_setup "$choice"
+                ;;
+        esac
+    done
+}
+
+function packages_gui_setup() 
+{
+    local section
+    local default
+    local options=()
+
+    for section in hardware book ; do
+        options+=(${section} "Manage ${__sections[$section]} packages" "$section Choose top install/update/configure packages from the ${__sections[$section]}")
+    done
+
+    local cmd
+    while true; do
+        cmd=(dialog --backtitle "$__backtitle" --cancel-label "Back" --item-help --help-button --default-item "$default" --menu "Choose an option" 22 76 16)
+
+        local choice
+        choice=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
+        [[ -z "$choice" ]] && break
+        section_gui_setup "$choice"
+        default="$choice"
+    done
+}
+
 function gui_setup() 
 {
     while true; do
@@ -25,7 +125,7 @@ function gui_setup()
         
         case "$choice" in
             P)
-                echo "packages_gui_setup"
+                packages_gui_setup
                 ;;
             S)
                 echo "updatescript_setup"

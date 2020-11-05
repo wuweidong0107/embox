@@ -1,5 +1,10 @@
 #!/bin/bash
 
+declare -A __mod_id_to_idx
+declare -A __sections
+__sections[book]="book"
+__sections[hardware]="hardware"
+
 function emb_listFunctions()
 {
     local idx
@@ -41,14 +46,22 @@ function emb_printUsageinfo()
     emb_listFunctions
 }
 
+function emb_getInstallPath() {
+    local idx="$1"
+    local id=$(emb_getIdFromIdx "$idx")
+    echo "$rootdir/${__mod_type[$idx]}/$id"
+}
+
 function emb_callModule()
 {
     local req_id="$1"
     local mode="$2"
+
+    # shift the function parameters left so $@ will contain any additional parameters which we can use in modules
+    shift 2
+
     local md_id
     local md_idx
-
-    local md_build="${__builddir}/${md_id}"
 
     if [[ "$req_id" =~ ^[0-9]+$ ]]; then
         md_id="$(emb_getIdFromIdx $req_id)"
@@ -58,17 +71,80 @@ function emb_callModule()
         md_id="$req_id"
     fi
 
-    if [[ -z "${mode}" ]]; then
+    case "$mode" in
+    ""|_source_)
         local modes=(depends sources build install configure clean)
         for mode in "${modes[@]}"; do
             emb_callModule "$md_idx" "$mode" || return 1
         done
         return 0
-    fi
+        ;;
+    esac
+
+    # create variables that can be used in modules
+    local md_desc="${__mod_desc[$md_idx]}"
+    local md_build="${__builddir}/${md_id}"
+    local md_inst="$(emb_getInstallPath $md_idx)"
 
     # create function name
-    local function="${mode}_${md_id}"
+    function="${mode}_${md_id}"
+
+    # these can be returned by a module
+    local md_ret_require=()
+    local md_ret_files=()
+    local md_ret_errors=()
+
+    case "$mode" in
+        install)
+            action="Installing"
+            mkdir -p "$md_inst"
+            ;;
+        *)
+            action="Running action '$mode' for"
+            ;;
+    esac
+
+    # print an action and a description
+    if [[ -n "$action" ]]; then
+        printMsgs "heading" "$action '$md_id' : $md_desc"
+    fi
+
     fnExists "$function" && "$function" "$@"
+
+    # check if any required files are found
+    if [[ -n "$md_ret_require" ]]; then
+        for file in "${md_ret_require[@]}"; do
+            if [[ ! -e "$file" ]]; then
+                md_ret_errors+=("Could not successfully $mode $md_id - $md_desc ($file not found).")
+                break
+            fi
+        done
+    fi
+
+    if [[ "${#md_ret_errors}" -eq 0 && -n "$md_ret_files" ]]; then
+        local file
+        for file in "${md_ret_files[@]}"; do
+            if [[ ! -e "$md_build/$file" ]]; then
+                md_ret_errors+=("Could not successfully install $md_desc ($md_build/$file not found).")
+                break
+            fi
+            cp -Rvf "$md_build/$file" "$md_inst"
+        done
+    fi
+
+    # some errors were returned.
+    if [[ "${#md_ret_errors[@]}" -gt 0 ]]; then
+        printMsgs "dialog" "${md_ret_errors[@]}"
+        return 1
+    fi
+    return 0
+}
+
+function emb_installModule() {
+    local idx="$1"
+    local mode="$2"
+    [[ -z "$mode" ]] && mode="_auto_"
+    emb_callModule "$idx" "$mode" || return 1
     return 0
 }
 
@@ -135,4 +211,16 @@ function emb_getIdxFromId()
 function emb_getIdFromIdx()
 {
     echo "${__mod_id[$1]}"
+}
+
+function emb_getSectionIds() {
+    local section
+    local id
+    local ids=()
+    for id in "${__mod_idx[@]}"; do
+        for section in "$@"; do
+            [[ "${__mod_section[$id]}" == "$section" ]] && ids+=("$id")
+        done
+    done
+    echo "${ids[@]}"
 }
