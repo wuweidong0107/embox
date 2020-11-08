@@ -94,10 +94,27 @@ function emb_callModule()
     local md_ret_files=()
     local md_ret_errors=()
 
+    local action
+    local pushed=1
+
+    # cd module $mode-working directory
     case "$mode" in
+        sources)
+            action="Getting sources for"
+            mkdir -p "$md_build"
+            pushd "$md_build"
+            pushed=$?
+            ;;
+        build)
+            action="Building"
+            pushd "$md_build"
+            pushed=$?
+            ;;
         install)
             action="Installing"
             mkdir -p "$md_inst"
+            pushd "$md_build"
+            pushed=$?
             ;;
         *)
             action="Running action '$mode' for"
@@ -132,6 +149,9 @@ function emb_callModule()
         done
     fi
 
+    # leave module $mode-working directory
+    [[ "$pushed" -eq 0 ]] && popd
+
     # some errors were returned.
     if [[ "${#md_ret_errors[@]}" -gt 0 ]]; then
         printMsgs "dialog" "${md_ret_errors[@]}"
@@ -148,6 +168,11 @@ function emb_installModule() {
     return 0
 }
 
+## @fn emb_registerModule()
+## @param md_idx module index
+## @param module_path module script path
+## @param module_type module type(scriptmodules/xxx)
+## @brief Check if module installed
 function emb_registerModule()
 {
     local module_idx="$1"
@@ -213,7 +238,8 @@ function emb_getIdFromIdx()
     echo "${__mod_id[$1]}"
 }
 
-function emb_getSectionIds() {
+function emb_getSectionIds() 
+{
     local section
     local id
     local ids=()
@@ -223,4 +249,15 @@ function emb_getSectionIds() {
         done
     done
     echo "${ids[@]}"
+}
+
+## @fn emb_isInstalled()
+## @param md_idx module index
+## @brief Check if module installed
+function emb_isInstalled()
+{
+    local md_idx="$1"
+    local md_inst="$rootdir/${__mod_type[$md_idx]}/${__mod_id[$md_idx]}"
+    [[ -d "$md_inst" ]] && return 0
+    return 1
 }
