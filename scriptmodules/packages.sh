@@ -88,6 +88,7 @@ function emb_callModule()
 
     # create function name
     function="${mode}_${md_id}"
+    fnExists "$function" || return 0
 
     # these can be returned by a module
     local md_ret_require=()

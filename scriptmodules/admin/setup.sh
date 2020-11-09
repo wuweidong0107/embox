@@ -54,7 +54,13 @@ function section_gui_setup()
         local idx
 
         for idx in $(emb_getSectionIds $section); do
-            pkgs+=("$idx" "${__mod_id[$idx]}" "$idx ${__mod_desc[$idx]}"$'\n\n'"${__mod_help[$idx]}")
+            if emb_isInstalled "$idx"; then
+                installed="\Zb(Installed)\Zn"
+                ((num_pkgs++))
+            else
+                installed=""
+            fi
+            pkgs+=("$idx" "${__mod_id[$idx]} ${installed}" "$idx ${__mod_desc[$idx]}"$'\n\n'"${__mod_help[$idx]}")
         done
 
         options+=(
@@ -66,6 +72,17 @@ function section_gui_setup()
         local cmd=(dialog --colors --backtitle "$__backtitle" --cancel-label "Back" --item-help --help-button --default-item "$default" --menu "Choose an option" 22 76 16)
         local choice=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
         [[ -z "$choice" ]] && break
+        if [[ "${choice[@]:0:4}" == "HELP" ]]; then
+            # remove HELP
+            choice="${choice[@]:5}"
+            # get id of menu item
+            default="${choice/%\ */}"
+            # remove id
+            choice="${choice#* }"
+            printMsgs "dialog" "$choice"
+            continue
+        fi
+
         default="$choice"
 
         case "$choice" in

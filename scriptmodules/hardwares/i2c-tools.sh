@@ -10,9 +10,10 @@ function sources_i2c-tools() {
 }
 
 function build_i2c-tools() {
-    :
+    make clean
+    make
 }
 
 function install_i2c-tools() {
-    :
+    DESTDIR=${md_inst} PREFIX=/usr/local make install
 }
