@@ -29,8 +29,7 @@ function printMsgs() {
 ## @brief Git clones or pulls a repository.
 ## @details depth parameter will default to 1 (shallow clone) so long as __persistent_repos isn't set.
 ## A depth parameter of 0 will do a full clone with all history.
-function gitPullOrClone()
-{
+function gitPullOrClone() {
     local dir="$1"
     local repo="$2"
     local branch="$3"
@@ -76,8 +75,7 @@ function gitPullOrClone()
 # @brief Checks if function name exists.
 # @retval 0 if the function name exists
 # @retval 1 if the function name does not exist
-function fnExists()
-{
+function fnExists() {
     declare -f "$1" > /dev/null
     return $?
 }
@@ -86,8 +84,7 @@ function fnExists()
 ## @param command command to run
 ## @brief Calls command and record any non zero return codes for later printing.
 ## @return whatever the command returns.
-function runCmd()
-{
+function runCmd() {
     local ret
     "$@"
     ret=$?

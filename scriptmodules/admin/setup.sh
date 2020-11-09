@@ -4,8 +4,7 @@ emb_module_id="setup"
 emb_module_desc="GUI based setup for embox"
 emb_module_section=""
 
-function package_setup()
-{
+function package_setup() {
     local idx="$1"
     local md_id="${__mod_id[$idx]}"
 
@@ -51,8 +50,7 @@ function package_setup()
     done
 }
 
-function section_gui_setup()
-{
+function section_gui_setup() {
     local section="$1"
     local default=""
 
@@ -107,8 +105,7 @@ function section_gui_setup()
     done
 }
 
-function packages_gui_setup() 
-{
+function packages_gui_setup() {
     local section
     local default
     local options=()
@@ -129,8 +126,7 @@ function packages_gui_setup()
     done
 }
 
-function gui_setup() 
-{
+function gui_setup() {
     while true; do
         local commit=$(git -C "$scriptdir" log -1 --pretty=format:"%cr (%h)")
 
