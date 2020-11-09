@@ -16,4 +16,6 @@ function build_i2c-tools() {
 
 function install_i2c-tools() {
     DESTDIR=${md_inst} PREFIX=/usr/local make install
+    make install
+    ldconfig
 }

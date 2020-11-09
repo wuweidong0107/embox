@@ -78,6 +78,11 @@ function emb_callModule()
         md_id="$req_id"
     fi
 
+    if [[ -z "$md_id" || -z "$md_idx" ]]; then
+        printMsgs "console" "No module '$req_id' found"
+        return 2
+    fi
+
     case "$mode" in
     _update_)
         local modes=(sources build install configure clean)
