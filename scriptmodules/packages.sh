@@ -52,6 +52,13 @@ function emb_getInstallPath() {
     echo "$rootdir/${__mod_type[$idx]}/$id"
 }
 
+## @fn emb_callModule()
+## @param req_id: module index
+## @param mode:
+##      _update_: update module
+##      _source_: install frome source
+## @brief: call function in module
+## @return: 0 on success
 function emb_callModule()
 {
     local req_id="$1"
@@ -72,6 +79,13 @@ function emb_callModule()
     fi
 
     case "$mode" in
+    _update_)
+        local modes=(sources build install configure clean)
+        for mode in "${modes[@]}"; do
+            emb_callModule "$md_idx" "$mode" || return 1
+        done
+        return 0
+        ;;
     ""|_source_)
         local modes=(depends sources build install configure clean)
         for mode in "${modes[@]}"; do
@@ -161,6 +175,13 @@ function emb_callModule()
     return 0
 }
 
+## @fn emb_installModule()
+## @param md_idx: module index
+## @param mode:
+##      _auto_: install/update
+##      _source_: install frome source
+## @brief: install or update module
+## @return: 0 on success
 function emb_installModule() {
     local idx="$1"
     local mode="$2"

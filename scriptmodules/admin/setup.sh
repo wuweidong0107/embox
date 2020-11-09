@@ -10,6 +10,7 @@ function package_setup()
     local md_id="${__mod_id[$idx]}"
 
     declare -A option_msgs=(
+        ["U"]="Update (from source)"
         ["B"]="Install from pre-compiled binary"
         ["S"]="Install from source"
     )
@@ -17,7 +18,11 @@ function package_setup()
     while true; do
         local options=()
 
-        options+=(S "${option_msgs[S]}")
+        if emb_isInstalled "$idx"; then
+            options+=(U "${option_msgs[U]}")
+        else
+            options+=(S "${option_msgs[S]}")
+        fi
 
         local help="${__mod_desc[$idx]}\n\n${__mod_help[$idx]}"
         if [[ -n "$help" ]]; then
@@ -28,8 +33,11 @@ function package_setup()
         choice=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 
         case "$choice" in
-            S)
-                mode="_source_"
+            U|S)
+                case "$choice" in
+                    U) mode="_update_" ;;
+                    S) mode="_source_" ;;
+                esac
                 dialog --defaultno --yesno "Are you sure you want to ${option_msgs[$choice]}?" 22 76 2>&1 >/dev/tty || continue
                 emb_installModule "$idx" "$mode" "force"
                 ;;
