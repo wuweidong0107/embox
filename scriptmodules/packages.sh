@@ -168,7 +168,7 @@ function emb_callModule() {
     fi
 
     # leave module $mode-working directory
-    [[ "$pushed" -eq 0 ]] && popd
+    [[ "$pushed" -eq 0 ]] && popd > /dev/null
 
     # some errors were returned.
     if [[ "${#md_ret_errors[@]}" -gt 0 ]]; then
