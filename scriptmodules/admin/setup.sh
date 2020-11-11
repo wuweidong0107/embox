@@ -110,7 +110,7 @@ function packages_gui_setup() {
     local default
     local options=()
 
-    for section in hardware book ; do
+    for section in book bsp hardware; do
         options+=(${section} "Manage ${__sections[$section]} packages" "$section Choose top install/update/configure packages from the ${__sections[$section]}")
     done
 
@@ -133,7 +133,7 @@ function gui_setup() {
         cmd=(dialog --backtitle "$__backtitle" --title "Embox-Setup Script" --cancel-label "Exit" --item-help --help-button --default-item "$default" --menu "Version: $__version - Last Commit: $commit\n" 22 76 16)
         options=(
             P "Manage packages"
-            "P Install/Remove and Configure the various components of embox, including hardware, books, modules, medias."
+            "P Install/Remove and Configure the various components of embox, including hardware, book, module, media."
 
             S "Update Embox-Setup script"
             "S Update this Embox-Setup script. This will update this main management script only, but will not update any software packages. To update packages use the 'Update' option from the main menu, which will also update the RetroPie-Setup script."

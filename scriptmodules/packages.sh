@@ -4,6 +4,7 @@ declare -A __mod_id_to_idx
 declare -A __sections
 __sections[book]="book"
 __sections[hardware]="hardware"
+__sections[bsp]="bsp"
 
 function emb_listFunctions() {
     local idx
@@ -231,10 +232,12 @@ function emb_registerModule() {
 function emb_registerModuleDir() {
     local module_idx="$1"
     local module_dir="$2"
+    set -x
     for module in $(find "${scriptdir}/scriptmodules/$2" -maxdepth 1 -name "*.sh" | sort); do
         emb_registerModule ${module_idx} "${module}" "${module_dir}"
         ((module_idx++))
     done
+    set +x
 }
 
 function emb_registerAllModules() {
@@ -245,7 +248,8 @@ function emb_registerAllModules() {
     __mod_help=()
     __mod_section=()
 
-    emb_registerModuleDir 100 "hardwares"
+    emb_registerModuleDir 100 "bsp"
+    emb_registerModuleDir 200 "hardware"
     emb_registerModuleDir 900 "admin"
 }
 
