@@ -1,7 +1,7 @@
 #!/bin/bash
 
 emb_module_id="tinyalsa"
-emb_module_desc="tinyalsa - Tiny library to interface with ALSA in the Linux kernel"
+emb_module_desc="tinyalsa - library to interface with ALSA"
 emb_module_help="/opt/embox/hardwares/tinyalsa"
 emb_module_section="hardware"
 

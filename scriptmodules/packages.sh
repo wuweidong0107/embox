@@ -172,7 +172,7 @@ function emb_callModule() {
 
     # some errors were returned.
     if [[ "${#md_ret_errors[@]}" -gt 0 ]]; then
-        printMsgs "dialog" "${md_ret_errors[@]}"
+        printMsgs "console" "${md_ret_errors[@]}"
         return 1
     fi
     return 0
@@ -232,12 +232,11 @@ function emb_registerModule() {
 function emb_registerModuleDir() {
     local module_idx="$1"
     local module_dir="$2"
-    set -x
+
     for module in $(find "${scriptdir}/scriptmodules/$2" -maxdepth 1 -name "*.sh" | sort); do
         emb_registerModule ${module_idx} "${module}" "${module_dir}"
         ((module_idx++))
     done
-    set +x
 }
 
 function emb_registerAllModules() {
