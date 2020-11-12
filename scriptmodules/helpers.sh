@@ -103,16 +103,79 @@ function runCmd() {
     return $ret
 }
 
+## @fn compareVersions()
+## @param version first version to compare
+## @param operator operator to use (lt le eq ne ge gt)
+## @brief version second version to compare
+## @retval 0 if the comparison was true
+## @retval 1 if the comparison was false
+function compareVersions() {
+    dpkg --compare-versions "$1" "$2" "$3" >/dev/null
+    return $?
+}
+
+## @fn hasPackage()
+## @param package name of Debian package
+## @param version requested version (optional)
+## @param comparison type of comparison - defaults to `ge` (greater than or equal) if a version parameter is provided.
+## @brief Test for an installed Debian package / package version.
+## @retval 0 if the requested package / version was installed
+## @retval 1 if the requested package / version was not installed
+function hasPackage() {
+    local pkg="$1"
+    local req_ver="$2"
+    local comp="$3"
+    [[ -z "$comp" ]] && comp="ge"
+
+    local ver
+    local status
+    local out=$(dpkg-query -W --showformat='${Status} ${Version}' $1 2>/dev/null)
+    if [[ "$?" -eq 0 ]]; then
+        ver="${out##* }"
+        status="${out% *}"
+    fi
+
+    local installed=0
+    [[ "$status" == *"ok installed" ]] && installed=1
+    # if we are not checking version
+    if [[ -z "$req_ver" ]]; then
+        # if the package is installed return true
+        [[ "$installed" -eq 1 ]] && return 0
+    else
+        # if checking version and the package is not installed we need to clear "ver" as it may contain
+        # the version number of a removed package and give a false positive with compareVersions.
+        # we still need to do the version check even if not installed due to the varied boolean operators
+        [[ "$installed" -eq 0 ]] && ver=""
+
+        compareVersions "$ver" "$comp" "$req_ver" && return 0
+    fi
+    return 1
+}
+
+## @fn aptUpdate()
+## @brief Calls apt-get update (if it has not been called before).
+function aptUpdate() {
+    if [[ "$__apt_update" != "1" ]]; then
+        apt-get update
+        __apt_update="1"
+    fi
+}
+
+## @fn aptInstall()
+## @param packages package / space separated list of packages to install
+## @brief Calls apt-get install with the packages provided.
+function aptInstall() {
+    aptUpdate
+    apt-get install -y "$@"
+    return $?
+}
+
 ## @fn getDepends()
 ## @param packages package / space separated list of packages to install
 ## @brief Installs packages if they are not installed.
 ## @retval 0 on success
 ## @retval 1 on failure
 function getDepends() {
-    apt install $@
-    ret=$?
-    return $ret
-
     local apt_pkgs=()
     local pkg
 
@@ -123,6 +186,7 @@ function getDepends() {
         fi
     done
 
+    [[ ${#apt_pkgs[@]} -eq 0 ]] && return
     aptInstall --no-install-recommends "${apt_pkgs[@]}"
 
     for pkg in ${apt_pkgs[@]}; do
@@ -190,7 +254,7 @@ function download() {
 function downloadAndVerify() {
     local url="$1"
     local dest="$2"
-set -x
+
     # if no destination, get the basename from the url (supported by GNU basename)
     [[ -z "$dest" ]] && dest="${PWD}/$(basename "$url")"
 
@@ -205,8 +269,6 @@ set -x
             fi
         fi
     fi
-set +x
-    sleep 5
     return "$ret"
 }
 
