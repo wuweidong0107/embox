@@ -14,6 +14,7 @@ __backtitle="Embox Setup. Installation folder: ${rootdir}"
 
 source "$scriptdir/scriptmodules/helpers.sh"
 source "$scriptdir/scriptmodules/packages.sh"
+source "$scriptdir/scriptmodules/system.sh"
 
 emb_registerAllModules
 

@@ -20,6 +20,15 @@ function printMsgs() {
     return 0
 }
 
+## @fn fatalError()
+## @param message string or array of messages to display
+## @brief Calls PrintMsgs with "heading" type, and exits immediately.
+function fatalError() {
+    printMsgs "heading" "Error"
+    echo -e "$1"
+    exit 1
+}
+
 ## @fn gitPullOrClone()
 ## @param dest destination directory
 ## @param repo repository to clone or pull from
@@ -44,7 +53,7 @@ function gitPullOrClone() {
 
     if [[ -d "$dir/.git" ]]; then
         pushd "$dir" > /dev/null
-        echo "console" "Updating \"$repo\" \"$dir\" \"$branch\""
+        printMsgs "console" "Updating \"$repo\" \"$dir\" \"$branch\""
         runCmd git checkout "$branch"
         runCmd git pull
         runCmd git submodule update --init --recursive --progress
@@ -55,19 +64,19 @@ function gitPullOrClone() {
             git+=" --depth $depth"
         fi
         git+=" --branch $branch"
-        echo "console" "$git \"$repo\" \"$dir\""
+        printMsgs "console" "$git \"$repo\" \"$dir\""
         runCmd $git "$repo" "$dir"
     fi
 
     if [[ -n "$commit" ]]; then
-        echo "console" "Winding back $repo->$branch to commit: #$commit"
+        printMsgs "console" "Winding back $repo->$branch to commit: #$commit"
         git -C "$dir" branch -D "$commit" &>/dev/null
         runCmd git -C "$dir" checkout -f "$commit" -b "$commit"
     fi
 
     branch=$(runCmd git -C "$dir" rev-parse --abbrev-ref HEAD)
     commit=$(runCmd git -C "$dir" rev-parse HEAD)
-    echo "console" "HEAD is now in branch '$branch' at commit '$commit'"
+    printMsgs "console" "HEAD is now in branch '$branch' at commit '$commit'"
 }
 
 # @fn fnExists()
@@ -103,6 +112,31 @@ function getDepends() {
     apt install $@
     ret=$?
     return $ret
+
+    local apt_pkgs=()
+    local pkg
+
+    for pkg in "$@"; do
+        # add package to apt_pkgs for installation if not installed
+        if ! hasPackage "$pkg"; then
+            apt_pkgs+=("$pkg")
+        fi
+    done
+
+    aptInstall --no-install-recommends "${apt_pkgs[@]}"
+
+    for pkg in ${apt_pkgs[@]}; do
+        if ! hasPackage "$pkg"; then
+            failed+=("$pkg")
+        fi
+    done
+
+    if [[ ${#failed[@]} -gt 0 ]]; then
+        md_ret_errors+=("Could not install package(s): ${failed[*]}.")
+        return 1
+    fi
+
+    return 0
 }
 
 ## @fn download()
