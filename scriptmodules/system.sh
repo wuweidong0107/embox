@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function setup_env() {
-    get_embox_depends
+    get_emb_depends
 }
 
 function get_emb_depends() {

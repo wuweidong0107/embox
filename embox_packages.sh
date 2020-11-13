@@ -16,6 +16,7 @@ source "$scriptdir/scriptmodules/helpers.sh"
 source "$scriptdir/scriptmodules/packages.sh"
 source "$scriptdir/scriptmodules/system.sh"
 
+setup_env
 emb_registerAllModules
 
 if [[ $# -gt 0 ]]; then

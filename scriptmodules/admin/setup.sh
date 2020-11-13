@@ -23,7 +23,7 @@ function package_setup() {
             options+=(S "${option_msgs[S]}")
         fi
 
-        local help="${__mod_desc[$idx]}\n\n${__mod_help[$idx]}"
+        local help="${__mod_desc[$idx]}\n\ninstall - $rootdir/${__mod_type[$idx]}/${__mod_id[$idx]}\n\n${__mod_help[$idx]}"
         if [[ -n "$help" ]]; then
             options+=(H "Package Help")
         fi
