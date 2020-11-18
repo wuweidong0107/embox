@@ -102,6 +102,15 @@ function emb_callModule() {
     local md_desc="${__mod_desc[$md_idx]}"
     local md_build="${__builddir}/${md_id}"
     local md_inst="$(emb_getInstallPath $md_idx)"
+    local md_help="${__mod_help[$md_idx]}"
+
+    case "$mode" in
+        # echo module help to console
+        help)
+            printMsgs "console" "$md_desc\n\n$md_help"
+            return 0;
+            ;;
+    esac
 
     # create function name
     function="${mode}_${md_id}"
