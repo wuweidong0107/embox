@@ -101,9 +101,10 @@ function emb_callModule() {
 
     # create variables that can be used in modules
     local md_desc="${__mod_desc[$md_idx]}"
+    local md_type="${__mod_type[$md_idx]}"
+    local md_help="${__mod_help[$md_idx]}"
     local md_build="${__builddir}/${md_id}"
     local md_inst="$(emb_getInstallPath $md_idx)"
-    local md_help="${__mod_help[$md_idx]}"
 
     case "$mode" in
         # echo module help to console

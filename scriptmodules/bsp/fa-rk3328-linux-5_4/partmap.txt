@@ -1,0 +1,5 @@
+
+
+# copy from https://github.com/friendlyarm/sd-fuse_rk3328
+flash=mmc,1:resc:raw:0x1400000,0x0C00000:resource.img;
+flash=mmc,1:kern:raw:0x2000000,0x2000000:kernel.img;
