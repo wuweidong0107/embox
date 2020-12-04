@@ -363,3 +363,43 @@ function extract() {
         ret=$?
     fi
 }
+
+## @fn compareVersions()
+## @param version first version to compare
+## @param operator operator to use (lt le eq ne ge gt)
+## @brief version second version to compare
+## @retval 0 if the comparison was true
+## @retval 1 if the comparison was false
+function compareVersions() {
+    dpkg --compare-versions "$1" "$2" "$3" >/dev/null
+    return $?
+}
+
+## @fn hasFlag()
+## @param string string to search in
+## @param flag flag to search for
+## @brief Checks for a flag in a string (consisting of space separated flags).
+## @retval 0 if the flag was found
+## @retval 1 if the flag was not found
+function hasFlag() {
+    local string="$1"
+    local flag="$2"
+    [[ -z "$string" || -z "$flag" ]] && return 1
+
+    if [[ "$string" =~ (^| )$flag($| ) ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+## @fn isPlatform()
+## @param platform
+## @brief Test for current platform / platform flags.
+function isPlatform() {
+    local flag="$1"
+    if hasFlag "${__platform_flags[*]}" "$flag"; then
+        return 0
+    fi
+    return 1
+}
