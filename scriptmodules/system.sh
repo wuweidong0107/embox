@@ -50,7 +50,7 @@ function get_platform() {
                     # ignore end null to avoid bash warning
                     local model=$(tr -d '\0' <$model_path)
                     case "$model" in
-                        "FriendlyElec NanoPi NEO3")
+                        "FriendlyElec NanoPi NEO3"|"FriendlyElec NanoPi R2 Pro")
                             __platform="rk3328"
                             __platform_flags+=(sdl1)
                             ;;
