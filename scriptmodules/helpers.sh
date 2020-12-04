@@ -403,3 +403,32 @@ function isPlatform() {
     fi
     return 1
 }
+
+## @fn embSwap()
+## @param command *on* to add swap if needed and *off* to remove later
+## @param memory total memory needed (swap added = memory needed - available memory)
+## @brief Adds additional swap to the system if needed.
+function embSwap() {
+    local command=$1
+    local swapfile="${scriptdir}/tmp/swap"
+    case $command in
+        on)
+            embSwap off
+            local needed=$2
+            local size=$((needed - __memory_avail))
+            mkdir -p "${scriptdir}/tmp/"
+            if [[ $size -ge 0 ]]; then
+                echo "Adding $size MB of additional swap"
+                fallocate -l ${size}M "$swapfile"
+                chmod 600 "$swapfile"
+                mkswap "$swapfile"
+                swapon "$swapfile"
+            fi
+            ;;
+        off)
+            echo "Removing additional swap"
+            swapoff "$swapfile" 2>/dev/null
+            rm -f "$swapfile"
+            ;;
+    esac
+}

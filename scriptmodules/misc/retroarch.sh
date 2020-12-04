@@ -18,7 +18,7 @@ function sources_retroarch() {
 
 function build_retroarch() {
 
-    if isPlatform "x86"; then       # cross_compile, never build for X86
+    if isPlatform "x86"; then       # cross_compile
         if [[ "$1" == "aarch64_sdl1" ]]; then
             export PATH=${rootdir}/bsp/fa-toolchain/opt/FriendlyARM/toolchain/6.4-aarch64/bin/:$PATH
             export NEED_CXX_LINKER=1
@@ -66,11 +66,13 @@ function build_retroarch() {
             --disable-videocore \
             --disable-v4l2 \
             --disable-discord \
-            --enable-neon \
             --disable-cdrom \
             --disable-qt \
             --disable-networking
+
+            embSwap on 1024
             make -j16
+            embSwap off
         fi
     fi
 }
