@@ -17,66 +17,62 @@ function sources_retroarch() {
 }
 
 function build_retroarch() {
-
-    if isPlatform "x86"; then       # cross_compile
-        if [[ "$1" == "aarch64_sdl1" ]]; then
+    local cross=$1
+    local params=()
+    if isPlatform "x86"; then
+        if [[ "${cross}" == "aarch64_sdl1" ]]; then
             export PATH=${rootdir}/bsp/fa-toolchain/opt/FriendlyARM/toolchain/6.4-aarch64/bin/:$PATH
-            export NEED_CXX_LINKER=1
-            export CC=aarch64-linux-gcc
-            export CXX=aarch64-linux-g++
-            ./configure \
-            --host=aarch64-linux- \
-            --disable-ffmpeg \
-            --disable-cg \
-            --disable-opengl_core \
-            --disable-pulse \
-            --disable-jack \
-            --disable-mali_fbdev \
-            --disable-x11 --disable-sdl2 \
-            --disable-wayland \
-            --disable-egl \
-            --enable-sdl \
-            --disable-opengl1 \
-            --disable-videocore \
-            --disable-v4l2 \
-            --disable-discord \
-            --enable-neon \
-            --disable-cdrom \
-            --disable-qt \
-            --disable-networking
-            make -j16
+            CROSS_COMPILE=aarch64-linux-
+            params+=(--host=aarch64-linux-)
         else
-            echo "Error: miss target(aarch64_sdl1)"
+            echo "Error: miss target for cross compile. supported: aarch64_sdl1"
             exit 1
         fi
-    else
-        if isPlatform "sdl1"; then
-            ./configure \
-            --disable-ffmpeg \
-            --disable-cg \
-            --disable-opengl_core \
-            --disable-pulse \
-            --disable-jack \
-            --disable-mali_fbdev \
-            --disable-x11 --disable-sdl2 \
-            --disable-wayland \
-            --disable-egl \
-            --enable-sdl \
-            --disable-opengl1 \
-            --disable-videocore \
-            --disable-v4l2 \
-            --disable-discord \
-            --disable-cdrom \
-            --disable-qt \
-            --disable-networking
+    fi
 
-            embSwap on 1024
-            make -j16
-            embSwap off
-        fi
+    if isPlatform "sdl1" || [[ "${cross}" == "aarch64_sdl1" ]]; then
+        params+=(\
+        --disable-ffmpeg \
+        --disable-cg \
+        --disable-opengl_core \
+        --disable-pulse \
+        --disable-jack \
+        --disable-mali_fbdev \
+        --disable-x11 --disable-sdl2 \
+        --disable-wayland \
+        --disable-egl \
+        --enable-sdl \
+        --disable-opengl \
+        --disable-opengl1 \
+        --disable-videocore \
+        --disable-v4l2 \
+        --disable-discord \
+        --disable-neon \
+        --disable-cdrom \
+        --disable-qt \
+        --disable-networking)
+    else
+        echo "Error: unsupported platform"
+        exit 1
+    fi
+
+    export NEED_CXX_LINKER=1
+    export CC=${CROSS_COMPILE}gcc
+    export CXX=${CROSS_COMPILE}g++
+    ./configure "${params[@]}"
+
+    local mem=$(awk '/MemFree/ { printf "%d", $2/1024 }' /proc/meminfo)
+    if [[ "${mem}" -lt 1024 ]]; then
+        embSwap on 1024
+    fi
+    make -j16
+    if [[ "${mem}" -lt 1024 ]]; then
+        embSwap off
     fi
 }
 
 function install_retroarch() {
-    :
+    md_ret_files=(
+        'retroarch'
+    )
 }
