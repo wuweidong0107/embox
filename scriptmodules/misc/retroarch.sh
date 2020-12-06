@@ -17,20 +17,9 @@ function sources_retroarch() {
 }
 
 function build_retroarch() {
-    local cross=$1
     local params=()
-    if isPlatform "x86"; then
-        if [[ "${cross}" == "aarch64_sdl1" ]]; then
-            export PATH=${rootdir}/bsp/fa-toolchain/opt/FriendlyARM/toolchain/6.4-aarch64/bin/:$PATH
-            CROSS_COMPILE=aarch64-linux-
-            params+=(--host=aarch64-linux-)
-        else
-            echo "Error: miss target for cross compile. supported: aarch64_sdl1"
-            exit 1
-        fi
-    fi
 
-    if isPlatform "sdl1" || [[ "${cross}" == "aarch64_sdl1" ]]; then
+    if isPlatform "sdl1"; then
         params+=(\
         --disable-ffmpeg \
         --disable-cg \
@@ -57,8 +46,8 @@ function build_retroarch() {
     fi
 
     export NEED_CXX_LINKER=1
-    export CC=${CROSS_COMPILE}gcc
-    export CXX=${CROSS_COMPILE}g++
+    export CC=gcc
+    export CXX=g++
     ./configure "${params[@]}"
 
     local mem=$(awk '/MemFree/ { printf "%d", $2/1024 }' /proc/meminfo)
