@@ -14,5 +14,6 @@ function build_triggerhappy() {
 }
 
 function install_triggerhappy() {
-    make install DESTDIR=${md_inst}
+    #make install DESTDIR=${md_inst}
+    make install
 }

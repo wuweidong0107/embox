@@ -15,7 +15,7 @@ function build_tinyalsa() {
 }
 
 function install_tinyalsa() {
-    DESTDIR=${md_inst} PREFIX=/usr/local make install
+    #DESTDIR=${md_inst} PREFIX=/usr/local make install
     make install
     ldconfig
 }
