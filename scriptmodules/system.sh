@@ -4,6 +4,8 @@ function setup_env() {
     get_platform
     get_os_version
     get_emb_depends
+
+    __target_paltform=""
 }
 
 function get_emb_depends() {
