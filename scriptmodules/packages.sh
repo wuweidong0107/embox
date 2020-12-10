@@ -5,6 +5,8 @@ declare -A __sections
 __sections[book]="book"
 __sections[hardware]="hardware"
 __sections[bsp]="bsp"
+__sections[graphic]="graphic"
+__sections[game]="game"
 __sections[misc]="misc"
 
 function emb_listFunctions() {
@@ -260,7 +262,9 @@ function emb_registerAllModules() {
 
     emb_registerModuleDir 100 "bsp"
     emb_registerModuleDir 200 "hardware"
-    emb_registerModuleDir 300 "misc"
+    emb_registerModuleDir 300 "graphic"
+    emb_registerModuleDir 700 "game"
+    emb_registerModuleDir 800 "misc"
     emb_registerModuleDir 900 "admin"
 }
 
