@@ -16,35 +16,39 @@ function emb_listFunctions() {
     local mode
     local func
 
-    echo -e "Index/ID:                 Description:                                 List of available actions"
-    echo "-----------------------------------------------------------------------------------------------------------------------------------"
+    echo "| Index/ID | Description | List of available actions |"
+    echo "| ----------- | ----------- | ----------- |"
     for idx in ${__mod_idx[@]}; do
         mod_id=${__mod_id[$idx]};
-        printf "%d/%-20s: %-42s :" "$idx" "$mod_id" "${__mod_desc[$idx]}"
+        printf "%d/%-20s| %-50s |" "$idx" "$mod_id" "${__mod_desc[$idx]}"
         while read mode; do
             # skip private module functions (start with an underscore)
             [[ "$mode" = _* ]] && continue
             mode=${mode//_$mod_id/}
             echo -n " $mode"
         done < <(compgen -A function -X \!*_$mod_id)
-        echo -n " help"
+        echo -n " help |"
         echo ""
     done
-    echo "==================================================================================================================================="
 }
 
 function emb_printUsageinfo() {
-    echo -e "Usage:\n$0 <Index # or ID>\nThis will run the actions depends, sources, build, install, configure and clean automatically.\n"
-    echo -e "Alternatively, $0 can be called as\n$0 <Index # or ID [depends|sources|build|install|configure|clean|remove]\n"
-    echo    "Definitions:"
-    echo    "depends:    install the dependencies for the module"
-    echo    "sources:    install the sources for the module"
-    echo    "build:      build/compile the module"
-    echo    "install:    install the compiled module"
-    echo    "configure:  configure the installed module (es_systems.cfg / launch parameters etc)"
-    echo    "clean:      remove the sources/build folder for the module"
-    echo    "help:       get additional help on the module"
-    echo -e "\nThis is a list of valid modules/packages and supported commands:\n"
+    echo -e "# Usage:\n"
+    echo -e "$ $0 <Index or ID>\n"
+    echo -e "This will run the actions depends, sources, build, install, configure and clean automatically.\n"
+    echo -e "Alternatively, $0 can be called as:\n"
+    echo -e "$ $0 <Index or ID> [depends|sources|build|install|configure|clean|remove]\n"
+    echo    "## Definitions:"
+    echo    "- depends:    install the dependencies for the module"
+    echo    "- sources:    install the sources for the module"
+    echo    "- build:      build/compile the module"
+    echo    "- install:    install the compiled module"
+    echo    "- configure:  configure the installed module"
+    echo    "- clean:      remove the sources/build folder for the module"
+    echo    "- help:       get additional help on the module"
+
+    echo -e "\n"
+    echo -e "# List of valid packages and supported commands:\n"
     emb_listFunctions
 }
 
