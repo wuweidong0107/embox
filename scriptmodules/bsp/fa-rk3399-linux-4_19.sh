@@ -6,7 +6,7 @@ emb_module_help="kernel-v4.19 for FriendlyElec rk3399 boards"
 emb_module_section="bsp"
 
 function depends_fa-rk3399-linux-4_19() {
-    :
+    emb_callModule fa-toolchain
 }
 
 function sources_fa-rk3399-linux-4_19() {

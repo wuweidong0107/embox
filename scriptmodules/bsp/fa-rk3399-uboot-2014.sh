@@ -6,7 +6,7 @@ emb_module_help="U-boot for FriendlyElec rk3399"
 emb_module_section="bsp"
 
 function depends_fa-rk3399-uboot-2014() {
-    :
+    emb_callModule fa-toolchain
 }
 
 function sources_fa-rk3399-uboot-2014() {

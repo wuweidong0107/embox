@@ -28,26 +28,29 @@ function build_fa-rk3328-linux-5_4() {
     ${sdfuse_tools}/prebuilt/boot/logo.bmp ${sdfuse_tools}/prebuilt/boot/logo_kernel.bmp
 }
 
-function install_img_fa-rk3328-linux-5_4() {
-    md_ret_files=(
-        'kernel.img'
-        'resource.img'
-    )
-}
-
-function install_mod_fa-rk3328-linux-5_4() {
-    make ARCH=arm64 CROSS_COMPILE=aarch64-linux- modules_install INSTALL_MOD_PATH="$md_inst" -j16
-}
-
+## @param target: install target (module|image)
 function install_fa-rk3328-linux-5_4() {
-    install_mod_fa-rk3328-linux-5_4
+    local target=$1
 
     cp ${scriptdir}/scriptmodules/${md_type}/fa-rk3328-linux-5_4/partmap.txt ${md_inst}
-
-    md_ret_files=(
-        'kernel.img'
-        'resource.img'
-    )
+    case "${target}" in
+        "image")
+            md_ret_files=(
+                'kernel.img'
+                'resource.img'
+            )
+            ;;
+        "module")
+            make ARCH=arm64 CROSS_COMPILE=aarch64-linux- modules_install INSTALL_MOD_PATH="$md_inst" -j16
+            ;;
+        *)
+            make ARCH=arm64 CROSS_COMPILE=aarch64-linux- modules_install INSTALL_MOD_PATH="$md_inst" -j16
+            md_ret_files=(
+                'kernel.img'
+                'resource.img'
+            )
+            ;;
+    esac
 }
 
 function upgrade_tf_fa-rk3328-linux-5_4() {
