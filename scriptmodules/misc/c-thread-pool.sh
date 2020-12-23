@@ -4,7 +4,6 @@ emb_module_id="c-thread-pool"
 emb_module_desc="c-thread-pool - minimal but powerful thread pool in ANSI C"
 emb_module_help="https://github.com/Pithikos/C-Thread-Pool"
 emb_module_section="misc"
-xxx
 function depends_c-thread-pool() {
     :
 }
