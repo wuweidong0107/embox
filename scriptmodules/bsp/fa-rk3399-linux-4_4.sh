@@ -11,7 +11,7 @@ function depends_fa-rk3399-linux-4_4() {
 
 function sources_fa-rk3399-linux-4_4() {
     gitPullOrClone "$md_build" https://github.com/friendlyarm/kernel-rockchip nanopi4-linux-v4.4.y
-    gitPullOrClone "${md_build}/sd-fuse_rk3399" https://github.com/friendlyarm/sd-fuse_rk3399
+    gitPullOrClone "${md_build}/sd-fuse_rk3399" https://github.com/friendlyarm/sd-fuse_rk3399 master
 }
 
 function build_fa-rk3399-linux-4_4() {
@@ -21,12 +21,14 @@ function build_fa-rk3399-linux-4_4() {
     make ARCH=arm64 CROSS_COMPILE=aarch64-linux- nanopi4_linux_defconfig
     make ARCH=arm64 CROSS_COMPILE=aarch64-linux- nanopi4-images -j16
     make ARCH=arm64 CROSS_COMPILE=aarch64-linux- modules -j16
+    make ARCH=arm64 CROSS_COMPILE=aarch64-linux- dtbs -j16
 }
 
 ## @param target: install target (module|image)
 function install_fa-rk3399-linux-4_4() {
     local target=$1
 
+    export PATH=${rootdir}/bsp/fa-toolchain/opt/FriendlyARM/toolchain/6.4-aarch64/bin/:$PATH
     cp ${scriptdir}/scriptmodules/${md_type}/fa-rk3399-linux-4_4/partmap.txt ${md_inst}
     case "${target}" in
         "image")
