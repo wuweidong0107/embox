@@ -6,5 +6,5 @@ emb_module_help="https://github.com/RetroPie/EmulationStation"
 emb_module_section="game"
 
 function sources_emulationstation() {
-    gitPullOrClone "$md_build" https://github.com/RetroPie/EmulationStation
+    gitPullOrClone "$md_build" https://github.com/RetroPie/EmulationStation stable
 }
