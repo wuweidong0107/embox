@@ -68,6 +68,8 @@ function get_platform() {
         esac
     fi
 
+    [ -z "${__platform}" ] && __platform="generic"
+
     if ! fnExists "platform_${__platform}"; then
         fatalError "Unknown platform - please manually set the __platform variable to one of the following: $(compgen -A function platform_ | cut -b10- | paste -s -d' ')"
     fi
@@ -90,4 +92,8 @@ function platform_x86() {
 
 function platform_rk3328() {
     __platform_flags+=(aarch64)
+}
+
+function platform_generic() {
+    :
 }
