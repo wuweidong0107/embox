@@ -432,3 +432,29 @@ function embSwap() {
             ;;
     esac
 }
+
+## @fn embCheckBlkSize()
+## @param dev: e.g. /dev/sde
+## @param maxsize: max KByte
+function embCheckBlkSize() {
+    local dev="$1"
+    local maxsize="$2"
+
+    [[ -z "${dev}" ]] && return 1
+    [[ -z "${maxsize}" ]] && return 1
+
+    local devname=$(basename ${dev})
+    local blksize=$(cat /sys/class/block/${devname}/size)
+
+    if [[ -z "${blksize}" ]] && [[ ${blksize} -le 0 ]]; then
+        echo "${dev} is inaccessible"
+        return 1
+    fi
+
+    let devsize=${blksize}/2
+    if [ ${devsize} -gt 64000000 ]; then
+        echo "${dev} size (${devsize} KB) is too large"
+        return 1
+    fi
+    return 0
+}

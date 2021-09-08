@@ -266,12 +266,13 @@ function emb_registerAllModules() {
     __mod_section=()
 
     emb_registerModuleDir 100 "bsp"
-    emb_registerModuleDir 200 "hardware"
-    emb_registerModuleDir 300 "graphic"
-    emb_registerModuleDir 400 "media"
-    emb_registerModuleDir 700 "game"
-    emb_registerModuleDir 800 "misc"
-    emb_registerModuleDir 900 "admin"
+    emb_registerModuleDir 200 "book"
+    emb_registerModuleDir 300 "hardware"
+    emb_registerModuleDir 400 "graphic"
+    emb_registerModuleDir 500 "media"
+    emb_registerModuleDir 600 "game"
+    emb_registerModuleDir 700 "misc"
+    emb_registerModuleDir 800 "admin"
 }
 
 function emb_getIdxFromId() {
