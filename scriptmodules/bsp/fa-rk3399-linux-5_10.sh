@@ -7,7 +7,6 @@ emb_module_section="bsp"
 
 function depends_fa-rk3399-linux-5_10() {
     emb_callModule fa-toolchain
-    emb_callModule sd_update-bin
 }
 
 function sources_fa-rk3399-linux-5_10() {
@@ -78,8 +77,6 @@ function upgrade_tf_fa-rk3399-linux-5_10() {
         && return
 
     local devname=$(basename ${dev})
-    local sdupdate="${scriptdir}/tmp/build/sd_update-bin/x86_64/sd_update"
-    local partmap="${md_inst}/partmap.txt"
     local blksize=$(cat /sys/class/block/${devname}/size)
 
     if [[ -z "${blksize}" ]] && [[ ${blksize} -le 0 ]]; then
@@ -92,7 +89,20 @@ function upgrade_tf_fa-rk3399-linux-5_10() {
         echo "Error: $1 size (${devsize} KB) is too large"
         exit 1
     fi
-    ${sdupdate} -d ${dev} -p ${partmap}
+    declare -A dev_part
+    dev_part[resource]=${devname}5
+    dev_part[kernel]=${devname}6
+    cd /sys/class/block
+    for i in ${devname}*; do 
+        part_name=$(cat ${i}/uevent | grep PARTNAME | cut -d= -f2)
+        if [ -n "${part_name}" ]; then
+            dev_part[${part_name}]=${i}
+        fi
+    done
+    cd ->/dev/null
+
+    dd if=${md_inst}/kernel.img of=/dev/${dev_part[kernel]}
+    dd if=${md_inst}/resource.img of=/dev/${dev_part[resource]}
 }
 
 function upgrade_usb_fa-rk3399-linux-5_10() {
