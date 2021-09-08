@@ -1,37 +1,42 @@
 #!/bin/bash
 
-emb_module_id="fa-rk3399-linux-4_4"
+emb_module_id="fa-rk3399-linux-5_10"
 emb_module_desc="kernel for friendlyelec rk3399"
-emb_module_help="kernel-v4.4 for FriendlyElec rk3399 boards"
+emb_module_help="kernel-v5.4 for FriendlyElec rk3399 boards"
 emb_module_section="bsp"
 
-function depends_fa-rk3399-linux-4_4() {
+function depends_fa-rk3399-linux-5_10() {
     emb_callModule fa-toolchain
     emb_callModule sd_update-bin
 }
 
-function sources_fa-rk3399-linux-4_4() {
-    gitPullOrClone "$md_build" https://github.com/friendlyarm/kernel-rockchip nanopi4-linux-v4.4.y
+function sources_fa-rk3399-linux-5_10() {
+    gitPullOrClone "$md_build" https://github.com/friendlyarm/kernel-rockchip nanopi-r2-v5.10.y
+    gitPullOrClone "${md_build}/sd-fuse_rk3399" https://github.com/friendlyarm/sd-fuse_rk3399 kernel-5.10.y
 }
 
-function build_fa-rk3399-linux-4_4() {
+function build_fa-rk3399-linux-5_10() {
     export PATH=${rootdir}/bsp/fa-toolchain/opt/FriendlyARM/toolchain/6.4-aarch64/bin/:$PATH
 
     touch .scmversion
-    make ARCH=arm64 CROSS_COMPILE=aarch64-linux- nanopi4_linux_defconfig
-    make ARCH=arm64 CROSS_COMPILE=aarch64-linux- nanopi4-images -j16
-    make ARCH=arm64 CROSS_COMPILE=aarch64-linux- modules -j16
-    make ARCH=arm64 CROSS_COMPILE=aarch64-linux- dtbs -j16
+    make ARCH=arm64 CROSS_COMPILE=aarch64-linux- nanopi-r2_linux_defconfig
+    make ARCH=arm64 CROSS_COMPILE=aarch64-linux- -j16
+
+    local sdfuse_tools=${md_build}/sd-fuse_rk3399
+    ${sdfuse_tools}/tools/mkkrnlimg arch/arm64/boot/Image kernel.img
+    ${sdfuse_tools}/tools/resource_tool \
+    --dtbname arch/arm64/boot/dts/rockchip/rk3399-nanopi*-rev*.dtb \
+    ${sdfuse_tools}/prebuilt/boot/logo.bmp ${sdfuse_tools}/prebuilt/boot/logo_kernel.bmp
 }
 
-function _install_module_fa-rk3399-linux-4_4() {
+function _install_module_fa-rk3399-linux-5_10() {
     make ARCH=arm64 CROSS_COMPILE=aarch64-linux- modules_install INSTALL_MOD_PATH="$md_inst" -j16
     unlink "$md_inst/lib/modules/${kver}/source"
     unlink "$md_inst/lib/modules/${kver}/build"
 }
 
 ## @param target: install target (module|image)
-function install_fa-rk3399-linux-4_4() {
+function install_fa-rk3399-linux-5_10() {
     local target=$1
 
     [ "${target}" == "help" ] \
@@ -40,7 +45,7 @@ function install_fa-rk3399-linux-4_4() {
 
     export PATH=${rootdir}/bsp/fa-toolchain/opt/FriendlyARM/toolchain/6.4-aarch64/bin/:$PATH
     local kver=$(make ARCH=arm64 CROSS_COMPILE=aarch64-linux- kernelrelease)
-    cp ${scriptdir}/scriptmodules/${md_type}/fa-rk3399-linux-4_4/partmap.txt ${md_inst}
+    cp ${scriptdir}/scriptmodules/${md_type}/fa-rk3399-linux-5_10/partmap.txt ${md_inst}
     case "${target}" in
         "image")
             md_ret_files=(
@@ -49,10 +54,10 @@ function install_fa-rk3399-linux-4_4() {
             )
             ;;
         "module")
-            _install_module_fa-rk3399-linux-4_4
+            _install_module_fa-rk3399-linux-5_10
             ;;
         *)
-            _install_module_fa-rk3399-linux-4_4
+            _install_module_fa-rk3399-linux-5_10
             md_ret_files=(
                 'kernel.img'
                 'resource.img'
@@ -61,7 +66,7 @@ function install_fa-rk3399-linux-4_4() {
     esac
 }
 
-function upgrade_tf_fa-rk3399-linux-4_4() {
+function upgrade_tf_fa-rk3399-linux-5_10() {
     local dev="$1"
 
     [ "${dev}" == "help" ] \
@@ -90,12 +95,12 @@ function upgrade_tf_fa-rk3399-linux-4_4() {
     ${sdupdate} -d ${dev} -p ${partmap}
 }
 
-function upgrade_usb_fa-rk3399-linux-4_4() {
+function upgrade_usb_fa-rk3399-linux-5_10() {
     # TODO
     echo "unsupported yet"
 }
 
-function upgrade_ssh_fa-rk3399-linux-4_4() {
+function upgrade_ssh_fa-rk3399-linux-5_10() {
     local ip="$1"
 
     [ "${ip}" == "help" ] \

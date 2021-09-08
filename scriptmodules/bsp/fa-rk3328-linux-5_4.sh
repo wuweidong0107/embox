@@ -8,12 +8,11 @@ emb_module_section="bsp"
 function depends_fa-rk3328-linux-5_4() {
     emb_callModule fa-toolchain
     emb_callModule sd_update-bin
-    emb_callModule sd-fuse_rk3328
 }
 
 function sources_fa-rk3328-linux-5_4() {
     gitPullOrClone "$md_build" https://github.com/friendlyarm/kernel-rockchip nanopi-r2-v5.4.y
-    gitPullOrClone "${md_build}/sd-fuse_rk3328" https://github.com/friendlyarm/sd-fuse_rk3328
+    gitPullOrClone "${md_build}/sd-fuse_rk3328" https://github.com/friendlyarm/sd-fuse_rk3328 kernel-v5.4.y
 }
 
 function build_fa-rk3328-linux-5_4() {

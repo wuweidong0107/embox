@@ -1,37 +1,34 @@
 #!/bin/bash
 
-emb_module_id="fa-rk3399-linux-4_4"
-emb_module_desc="kernel for friendlyelec rk3399"
-emb_module_help="kernel-v4.4 for FriendlyElec rk3399 boards"
+emb_module_id="fa-h3-linux-4_14"
+emb_module_desc="kernel for friendlyelec h3"
+emb_module_help="kernel-v5.4 for FriendlyElec h3 boards"
 emb_module_section="bsp"
 
-function depends_fa-rk3399-linux-4_4() {
+function depends_fa-h3-linux-4_14() {
     emb_callModule fa-toolchain
-    emb_callModule sd_update-bin
 }
 
-function sources_fa-rk3399-linux-4_4() {
-    gitPullOrClone "$md_build" https://github.com/friendlyarm/kernel-rockchip nanopi4-linux-v4.4.y
+function sources_fa-h3-linux-4_14() {
+    gitPullOrClone "$md_build" https://github.com/friendlyarm/kernel-rockchip nanopi-r2-v5.4.y
 }
 
-function build_fa-rk3399-linux-4_4() {
+function build_fa-h3-linux-4_14() {
     export PATH=${rootdir}/bsp/fa-toolchain/opt/FriendlyARM/toolchain/6.4-aarch64/bin/:$PATH
 
     touch .scmversion
-    make ARCH=arm64 CROSS_COMPILE=aarch64-linux- nanopi4_linux_defconfig
-    make ARCH=arm64 CROSS_COMPILE=aarch64-linux- nanopi4-images -j16
-    make ARCH=arm64 CROSS_COMPILE=aarch64-linux- modules -j16
-    make ARCH=arm64 CROSS_COMPILE=aarch64-linux- dtbs -j16
+    make ARCH=arm CROSS_COMPILE=aarch64-linux- nanopi-r2_linux_defconfig
+    make ARCH=arm CROSS_COMPILE=aarch64-linux- -j16
 }
 
-function _install_module_fa-rk3399-linux-4_4() {
-    make ARCH=arm64 CROSS_COMPILE=aarch64-linux- modules_install INSTALL_MOD_PATH="$md_inst" -j16
+function _install_module_fa-h3-linux-4_14() {
+    make ARCH=arm CROSS_COMPILE=aarch64-linux- modules_install INSTALL_MOD_PATH="$md_inst" -j16
     unlink "$md_inst/lib/modules/${kver}/source"
     unlink "$md_inst/lib/modules/${kver}/build"
 }
 
 ## @param target: install target (module|image)
-function install_fa-rk3399-linux-4_4() {
+function install_fa-h3-linux-4_14() {
     local target=$1
 
     [ "${target}" == "help" ] \
@@ -39,8 +36,8 @@ function install_fa-rk3399-linux-4_4() {
         && return
 
     export PATH=${rootdir}/bsp/fa-toolchain/opt/FriendlyARM/toolchain/6.4-aarch64/bin/:$PATH
-    local kver=$(make ARCH=arm64 CROSS_COMPILE=aarch64-linux- kernelrelease)
-    cp ${scriptdir}/scriptmodules/${md_type}/fa-rk3399-linux-4_4/partmap.txt ${md_inst}
+    local kver=$(make ARCH=arm CROSS_COMPILE=aarch64-linux- kernelrelease)
+    cp ${scriptdir}/scriptmodules/${md_type}/fa-h3-linux-4_14/partmap.txt ${md_inst}
     case "${target}" in
         "image")
             md_ret_files=(
@@ -49,10 +46,10 @@ function install_fa-rk3399-linux-4_4() {
             )
             ;;
         "module")
-            _install_module_fa-rk3399-linux-4_4
+            _install_module_fa-h3-linux-4_14
             ;;
         *)
-            _install_module_fa-rk3399-linux-4_4
+            _install_module_fa-h3-linux-4_14
             md_ret_files=(
                 'kernel.img'
                 'resource.img'
@@ -61,7 +58,7 @@ function install_fa-rk3399-linux-4_4() {
     esac
 }
 
-function upgrade_tf_fa-rk3399-linux-4_4() {
+function upgrade_tf_fa-h3-linux-4_14() {
     local dev="$1"
 
     [ "${dev}" == "help" ] \
@@ -90,12 +87,12 @@ function upgrade_tf_fa-rk3399-linux-4_4() {
     ${sdupdate} -d ${dev} -p ${partmap}
 }
 
-function upgrade_usb_fa-rk3399-linux-4_4() {
+function upgrade_usb_fa-h3-linux-4_14() {
     # TODO
     echo "unsupported yet"
 }
 
-function upgrade_ssh_fa-rk3399-linux-4_4() {
+function upgrade_ssh_fa-h3-linux-4_14() {
     local ip="$1"
 
     [ "${ip}" == "help" ] \
@@ -118,7 +115,7 @@ function upgrade_ssh_fa-rk3399-linux-4_4() {
     case "${target}" in
         "image")
             scp ${data[*]} ${dest}
-            echo -e "\nRun command on RK3399:\n $ cd root\n $ ./sd_update -d /dev/mmcblkX -p partmap.txt"
+            echo -e "\nRun command on RK3328:\n $ cd root\n $ ./sd_update -d /dev/mmcblkX -p partmap.txt"
             ;;
         "module")
             scp -r ${md_inst}/lib root@${ip}:/
@@ -126,7 +123,7 @@ function upgrade_ssh_fa-rk3399-linux-4_4() {
         *)
             scp -r ${md_inst}/lib root@${ip}:/
             scp ${data[*]} ${dest}
-            echo -e "\nRun command on RK3399:\n $ cd root\n $ ./sd_update -d /dev/mmcblkX -p partmap.txt"
+            echo -e "\nRun command on RK3328:\n $ cd root\n $ ./sd_update -d /dev/mmcblkX -p partmap.txt"
             ;;
     esac
 }
