@@ -18,13 +18,17 @@ function build_fa-rk3399-linux-5_10() {
     export PATH=${rootdir}/bsp/fa-toolchain/opt/FriendlyARM/toolchain/6.4-aarch64/bin/:$PATH
 
     touch .scmversion
-    make ARCH=arm64 CROSS_COMPILE=aarch64-linux- nanopi-r2_linux_defconfig
+    make ARCH=arm64 CROSS_COMPILE=aarch64-linux- nanopi4_linux_defconfig
     make ARCH=arm64 CROSS_COMPILE=aarch64-linux- -j16
+
+    cp -f arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dtb arch/arm64/boot/dts/rockchip/rk3399-nanopi4-rev09.dtb
+    cp -f arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dtb arch/arm64/boot/dts/rockchip/rk3399-nanopi4-rev0a.dtb
+    cp -f arch/arm64/boot/dts/rockchip/rk3399-nanopc-t4.dtb arch/arm64/boot/dts/rockchip/rk3399-nanopi4-rev00.dtb
 
     local sdfuse_tools=${md_build}/sd-fuse_rk3399
     ${sdfuse_tools}/tools/mkkrnlimg arch/arm64/boot/Image kernel.img
     ${sdfuse_tools}/tools/resource_tool \
-    --dtbname arch/arm64/boot/dts/rockchip/rk3399-nanopi*-rev*.dtb \
+    --dtbname arch/arm64/boot/dts/rockchip/rk3399-nanopi4*-rev*.dtb \
     ${sdfuse_tools}/prebuilt/boot/logo.bmp ${sdfuse_tools}/prebuilt/boot/logo_kernel.bmp
 }
 
@@ -44,7 +48,6 @@ function install_fa-rk3399-linux-5_10() {
 
     export PATH=${rootdir}/bsp/fa-toolchain/opt/FriendlyARM/toolchain/6.4-aarch64/bin/:$PATH
     local kver=$(make ARCH=arm64 CROSS_COMPILE=aarch64-linux- kernelrelease)
-    cp ${scriptdir}/scriptmodules/${md_type}/fa-rk3399-linux-5_10/partmap.txt ${md_inst}
     case "${target}" in
         "image")
             md_ret_files=(
@@ -101,8 +104,8 @@ function upgrade_tf_fa-rk3399-linux-5_10() {
     done
     cd ->/dev/null
 
-    dd if=${md_inst}/kernel.img of=/dev/${dev_part[kernel]}
-    dd if=${md_inst}/resource.img of=/dev/${dev_part[resource]}
+    [ -f ${md_inst}/kernel.img ] && dd if=${md_inst}/kernel.img of=/dev/${dev_part[kernel]}
+    [ -f ${md_inst}/resource.img ] && dd if=${md_inst}/resource.img of=/dev/${dev_part[resource]}
 }
 
 function upgrade_usb_fa-rk3399-linux-5_10() {
@@ -124,16 +127,15 @@ function upgrade_ssh_fa-rk3399-linux-5_10() {
     local target="$2"
 
     local data=(
-        "${scriptdir}/tmp/build/sd_update-bin/aarch64/sd_update"
-        "${md_inst}/partmap.txt"
         "${md_inst}/kernel.img"
         "${md_inst}/resource.img"
     )
-    local dest="root@${ip}:/root/"
+    ssh root@${ip} mkdir -p ${md_inst}
+    local dest="root@${ip}:${md_inst}"
     case "${target}" in
         "image")
             scp ${data[*]} ${dest}
-            echo -e "\nRun command on RK3399:\n $ cd root\n $ ./sd_update -d /dev/mmcblkX -p partmap.txt"
+            echo -e "\nRun command on RK3399:\n $ ./embox_packages.sh ${md_id} upgrade_tf /dev/mmcblkX"
             ;;
         "module")
             scp -r ${md_inst}/lib root@${ip}:/
@@ -141,7 +143,7 @@ function upgrade_ssh_fa-rk3399-linux-5_10() {
         *)
             scp -r ${md_inst}/lib root@${ip}:/
             scp ${data[*]} ${dest}
-            echo -e "\nRun command on RK3399:\n $ cd root\n $ ./sd_update -d /dev/mmcblkX -p partmap.txt"
+            echo -e "\nRun command on RK3399:\n $ ./embox_packages.sh ${md_id} upgrade_tf /dev/mmcblkX"
             ;;
     esac
 }
