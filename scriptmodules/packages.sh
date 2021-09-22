@@ -98,7 +98,7 @@ function emb_callModule() {
         return 0
         ;;
     ""|_source_)
-        local modes=(depends sources build install configure clean)
+        local modes=(depends sources build install run configure clean)
         for mode in "${modes[@]}"; do
             emb_callModule "$md_idx" "$mode" || return 1
         done

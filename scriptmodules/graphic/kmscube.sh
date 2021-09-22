@@ -22,14 +22,13 @@ function depends_kmscube() {
 }
 
 function sources_kmscube() {
-    # test commit: 9f63f359fab1b5d8e862508e4e51c9dfe339ccb0
+    # last test commit: Sun Feb 7 11:42:33 2021 / 9f63f359fab1b5d8e862508e4e51c9dfe339ccb0
     gitPullOrClone "$md_build" https://gitlab.freedesktop.org/mesa/kmscube/
 }
 
 function build_kmscube() {
-    mkdir -p build
     meson build
-    cd build && ninja
+    ninja -C build
 }
 
 function install_kmscube() {
@@ -37,4 +36,9 @@ function install_kmscube() {
         'build/kmscube'
         'build/texturator'
     )
+}
+
+function run_kmscube() {
+    ${md_inst}/kmscube
+    ${md_inst}/texturator -z 3D RG16UI 37x65x4
 }
