@@ -110,7 +110,7 @@ function packages_gui_setup() {
     local default
     local options=()
 
-    for section in book bsp hardware game graphic media misc; do
+    for section in book bsp hardware game graphics media misc; do
         options+=(${section} "Manage ${__sections[$section]} packages" "$section Choose top install/update/configure packages from the ${__sections[$section]}")
     done
 

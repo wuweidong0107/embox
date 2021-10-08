@@ -3,7 +3,7 @@
 emb_module_id="libdrm"
 emb_module_desc="libdrm - Userspace library for drm"
 emb_module_help="https://gitlab.freedesktop.org/mesa/drm"
-emb_module_section="media"
+emb_module_section="graphics"
 
 function depends_libdrm() {
     local depends=(meson ninja-build)
