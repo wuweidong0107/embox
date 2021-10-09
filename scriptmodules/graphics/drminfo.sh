@@ -1,11 +1,11 @@
 #!/bin/bash
 
-emb_module_id="libdrm"
-emb_module_desc="libdrm - Userspace library for drm"
-emb_module_help="https://gitlab.freedesktop.org/mesa/drm"
+emb_module_id="drminfo"
+emb_module_desc="drminfo - Small utility to dump info about DRM devices."
+emb_module_help="https://github.com/ascent12/drm_info"
 emb_module_section="graphics"
 
-function depends_libdrm() {
+function depends_drminfo() {
     local depends=(meson ninja-build)
 
     getDepends "${depends[@]}"
@@ -21,23 +21,21 @@ function depends_libdrm() {
     fi
 }
 
-function sources_libdrm() {
-    # last test commit: Mon Aug 2 01:06:44 2021 / 8d0fb9b3f225183fb3276a0e4ae1f8354a3519e8
-    gitPullOrClone "$md_build" https://gitlab.freedesktop.org/mesa/drm
+function sources_drminfo() {
+    gitPullOrClone "$md_build" https://github.com/ascent12/drm_info
 }
 
-function build_libdrm() {
+function build_drminfo() {
     meson build/
     ninja -C build install
 }
 
-function install_libdrm() {
+function install_drminfo() {
         md_ret_files=(
-        build/tests
-        build/lib*
+        'build/drm_info'
     )
 }
 
-function run_libdrm() {
+function run_drminfo() {
     :
 }
