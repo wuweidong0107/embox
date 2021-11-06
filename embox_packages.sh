@@ -19,9 +19,6 @@ source "$scriptdir/scriptmodules/system.sh"
 setup_env
 emb_registerAllModules
 
-export http_proxy=http://192.168.1.39:1082
-export https_proxy=http://192.168.1.39:1082
-
 if [[ $# -gt 0 ]]; then
     emb_callModule $@
 else

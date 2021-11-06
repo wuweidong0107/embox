@@ -49,35 +49,81 @@ function install_fa-rk3399-linux-4_19() {
 }
 
 function upgrade_tf_fa-rk3399-linux-4_19() {
+    local dev="$1"
 
-    local dev=$1
-    if ! embCheckBlkSize ${dev} 64000000; then
-        echo "Error: invalid block dev ${dev}"
+    [ "${dev}" == "help" ] \
+        && echo "Usage: embox_packages.sh ${md_id} upgrade_tf /dev/sdX" \
+        && return
+
+    [[ -z "${dev}" ]] \
+        && echo "Usage: embox_packages.sh ${md_id} upgrade_tf /dev/sdX" \
+        && return
+
+    local devname=$(basename ${dev})
+    local blksize=$(cat /sys/class/block/${devname}/size)
+
+    if [[ -z "${blksize}" ]] && [[ ${blksize} -le 0 ]]; then
+        echo "Error: $1 is inaccessible"
         exit 1
     fi
 
-    # abandon "sd_update -d /dev/sdX -p parameter.txt" becasue
-    # sd_update will remake gpt partition table
-    local subdev
-    local label
-    declare -A kdata
-    kdata=(
-        ['resource']='5'
-        ['kernel']='6'
-        )
-    for idx in ${!kdata[@]}; do
-        subdev="${dev}${kdata[$idx]}"
-        label=$(blkid ${subdev} -o export | grep PARTLABEL | cut -d= -f2)
-        if [ "${label}" == "${idx}" ]; then
-            dd if=${md_inst}/${idx}.img of=${subdev}
-        else
-            echo "${subdev}'s label($label) != ${idx}"
-            exit 1
+    let devsize=${blksize}/2
+    if [ ${devsize} -gt 64000000 ]; then
+        echo "Error: $1 size (${devsize} KB) is too large"
+        exit 1
+    fi
+    declare -A dev_part
+    dev_part[resource]=${devname}5
+    dev_part[kernel]=${devname}6
+    cd /sys/class/block
+    for i in ${devname}*; do 
+        part_name=$(cat ${i}/uevent | grep PARTNAME | cut -d= -f2)
+        if [ -n "${part_name}" ]; then
+            dev_part[${part_name}]=${i}
         fi
     done
+    cd ->/dev/null
+
+    [ -f ${md_inst}/kernel.img ] && dd if=${md_inst}/kernel.img of=/dev/${dev_part[kernel]}
+    [ -f ${md_inst}/resource.img ] && dd if=${md_inst}/resource.img of=/dev/${dev_part[resource]}
 }
 
 function upgrade_usb_fa-rk3399-linux-4_19() {
     # TODO
     echo "unsupported yet"
+}
+
+function upgrade_ssh_fa-rk3399-linux-4_19() {
+    local ip="$1"
+
+    [ "${ip}" == "help" ] \
+        && echo "Usage: embox_packages.sh ${md_id} upgrade_ssh ip <target>[image|module]" \
+        && return
+
+    [[ -z "${ip}" ]] \
+        && echo "Usage: embox_packages.sh ${md_id} upgrade_ssh ip <target>[image|module]" \
+        && return
+
+    local target="$2"
+
+    local data=(
+        "${md_inst}/kernel.img"
+        "${md_inst}/resource.img"
+    )
+    ssh root@${ip} mkdir -p ${md_inst}
+    local dest="root@${ip}:${md_inst}"
+    case "${target}" in
+        "image")
+            scp ${data[*]} ${dest}
+            echo -e "\nRun command on RK3399:\n $ ./embox_packages.sh ${md_id} upgrade_tf /dev/mmcblkX"
+            ;;
+        "module")
+            scp -r ${md_inst}/lib root@${ip}:/
+            ;;
+        *)
+            scp -r ${md_inst}/lib root@${ip}:/
+            scp ${data[*]} ${dest}
+            echo -e "\nRun command on RK3399:\n $ ./embox_packages.sh ${md_id} upgrade_tf /dev/mmcblkX"
+            ;;
+    esac
 }
